@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/highmaps.js"></script>
+    <!--script src="js/exporting.js"></script-->
+    <script src="js/china.js"></script>
+</head>
+<body>
+<div id="map" style="width:800px;height: 500px;"></div>
+
+<script>
+    var data = new Array(45) ;
+     $.ajaxSettings.async = false;//取消异步调用
+     $.getJSON('json/china.json', function(jsondata) {
+         var chinaProvince = jsondata.features;//china.json下的features是省份数据的数组
+         for(var x=0;x<chinaProvince.length;x++){
+             //alert(chinaProvince[x].properties.name);
+             data[x] = {
+               "name":chinaProvince[x].properties.name,
+               "value":x*2
+             };
+         }
+    });
+    var map = new Highcharts.Map('map', {
+        title: {
+            text: '中国地图'
+        },
+        colorAxis: {//颜色轴
+            min: 0,//数据value的起始判断值必须设置
+            max: 100,//可选，不设置会自动判断，如最大value为92，js会设置为100
+            minColor: 'rgb(255,255,255)',
+            maxColor: '#006cee'//最大value值对应的颜色
+        },
+        series: [{
+            data: data,
+            name: 'randomData',
+            mapData: Highcharts.maps['cn/china'],
+            joinBy: 'name' // 设置根据data的name属性进行关联
+        }]
+    });
+</script>
+</body>
+</html>

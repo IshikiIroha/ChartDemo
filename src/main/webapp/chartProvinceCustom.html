@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/highmaps.js"></script>
+    <!--script src="js/exporting.js"></script-->
+    <script src="js/china.js"></script>
+    <link rel="stylesheet" href="css/button.css"></link>
+</head>
+<body>
+<div id="map" style="width:800px;height: 500px;"></div>
+<button class="btn-gradient green mini" onclick="window.location='chartCityController.html'">城市分级图</button>
+<script>
+//    $.getJSON('https://data.jianshukeji.com/jsonp?filename=geochina/china.json&callback=?', function(data) {
+//            var p = data.features;
+//            for(var name in p){
+//                alert(JSON.stringify(p[name]));
+//            }
+//    });
+    $.ajaxSettings.async = false;//取消异步调用
+    var data = [{"name":"北京","value":52},{"name":"天津","value":20},{"name":"河北","value":94},{"name":"山西","value":19},{"name":"内蒙古","value":21},{"name":"辽宁","value":24},{"name":"吉林","value":92},{"name":"黑龙江","value":25},{"name":"上海","value":43},{"name":"江苏","value":64},{"name":"浙江","value":57},{"name":"安徽","value":76},{"name":"福建","value":92},{"name":"江西","value":42},{"name":"山东","value":93},{"name":"河南","value":74},{"name":"湖北","value":38},{"name":"湖南","value":18},{"name":"广东","value":94},{"name":"广西","value":23},{"name":"海南","value":93},{"name":"重庆","value":52},{"name":"四川","value":95},{"name":"贵州","value":86},{"name":"云南","value":1},{"name":"西藏","value":34},{"name":"陕西","value":44},{"name":"甘肃","value":59},{"name":"青海","value":9},{"name":"宁夏","value":43},{"name":"新疆","value":76},{"name":"台湾","value":82},{"name":"香港","value":33},{"name":"澳门","value":49},{"name":"南海诸岛","value":61},{"name":"南海诸岛","value":48}];
+    var map = new Highcharts.Map('map', {
+        title: {
+            text: '省份热力图'
+        },
+        colorAxis: {//颜色轴
+            min: 0,//数据value的起始判断值必须设置
+            max: 100,//可选，不设置会自动判断，如最大value为92，js会设置为100
+            minColor: 'rgb(255,255,255)',
+            maxColor: '#006cee'//最大value值对应的颜色
+        },
+        series: [{
+            data: data,
+            name: 'randomData',
+            mapData: Highcharts.maps['cn/china'],
+            joinBy: 'name' // 设置根据data的name属性进行关联
+        }]
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/highmaps.js"></script>
+    <!--script src="js/exporting.js"></script-->
+    <script src="js/china.js"></script>
+    <link rel="stylesheet" href="css/button.css"></link>
+</head>
+<body>
+<div id="map" style="width:800px;height: 500px;"></div>
+<button class="btn-gradient green mini" onclick="window.location='chartProvinceCustom.html'">省份热力图</button>
+<script>
+    $.ajaxSettings.async = false;//取消异步调用
+    $.get("getChartDatas.action",function(data){
+        //alert(data[0].name);
+        //alert(JSON.stringify(data));
+        var series = [{//地图对象
+            type: 'map',
+            color: '#f7f7f7',
+            nullColor: '#f7f7f7',
+            mapData: Highcharts.maps["cn/china"],//创建底图
+            joinBy: 'name',
+            name: 'randomData',
+            states: {
+                hover: {
+                    color: '#a4edba'
+                }
+            },
+            showInLegend: false//底图颜色是否显示在legend图例中
+        }];
+        series.push({//创建数据组，push的顺序就是legend图例的展示顺序。js会为每个数据组自动赋予一种颜色，也可以在添加数据组和数据时自行指定。
+            name: '[0,20)',//定义数据的level
+            visible: true,//显示
+            data: []
+        });
+        series.push({
+            name: '[20,40)',//定义数据的level
+            visible: true,//显示
+            data: []
+        });
+        series.push({
+            name: '[40,60)',//定义数据的level
+            visible: true,//显示
+            data: []
+        });
+        series.push({
+            name: '[60,80)',//定义数据的level
+            visible: true,//显示
+            data: []
+        });
+        series.push({
+            name: '[80,100]',//定义数据的level
+            visible: true,//显示
+            data: []
+        });
+        $.getJSON('json/cities.json', function(chinaCity) {
+            for(var x in data){
+                //alert(JSON.stringify(chinaCity));
+                var city = chinaCity[data[x].name];
+                //var color;
+                var pushIndex;
+                if(data[x].value>=0&&data[x].value<20){
+                    //color = 'green';
+                    pushIndex = 1;
+                }else if(data[x].value>=20&&data[x].value<40){
+                    //color = 'yellow';
+                    pushIndex = 2;
+                }else if(data[x].value>=40&&data[x].value<60){
+                    //color = 'purple';
+                    pushIndex = 3;
+                }else if(data[x].value>=60&&data[x].value<80) {
+                    //color = 'blue';
+                    pushIndex = 4;
+                }else if(data[x].value>=80&&data[x].value<=100) {
+                    //color = 'red';
+                    pushIndex = 5;
+                }
+                series[pushIndex].data.push({
+                    x: city.x,
+                    y: -city.y,
+                    name: city.name,
+                    properties: city,//可选
+                    value: data[x].value,//自定义传值
+                    note: 'data-'+x//自定义描述
+                    //color: color
+                });
+            }
+            // var beijing = chinaCity['北京'],
+            //     shanghai = chinaCity['上海'],
+            //     data = [{
+            //         // 直接用转换好的坐标位置
+            //         x: beijing.x,
+            //         y: -beijing.y,
+            //         name: beijing.name,
+            //         color: 'blue'
+            //     },{
+            //         // 用经纬度的话，经纬度转换需要额外的引入 proj4js 库
+            //         x: shanghai.x,
+            //         y: -shanghai.y,
+            //         color: 'green',
+            //         name: shanghai.name
+            //     }];
+            var map = new Highcharts.Map('map', {//生成地图
+                chart: {//图表类型
+                    type: 'mappoint'//点集图必须设置
+                },
+                title: {
+                    text: '城市分级图'//地图标题
+                },
+                mapNavigation: {
+                    enabled: true,//开启导航，双击城市坐标地图可放大
+                    buttonOptions: {
+                        verticalAlign: 'bottom'
+                    }
+                },
+                legend: {
+                    layout: 'vertical',//vertical-垂直展示，horizontal-水平展示
+                    align: 'left',//位置
+                    floating: true,//浮动于地图上方，或显示在地图外部
+                    x: 30//x轴偏移值
+                },
+                tooltip: {//工具提示，鼠标移到数据对象上自动显示。
+                    useHTML: true,//以HTML格式设置
+                    headerFormat: '<u>{point.key}</u><table>',
+                    pointFormat: '<tr><td>城市分级</td><td>{series.name}</td></tr><tr><td>自定义</td><td>{point.note}:{point.value}</td></tr>' 	+
+                    '<tr><td>经纬度</td><td>({point.properties.lon:.2f}, {point.properties.lat:.2f})</td></tr></table>'
+                },
+                // plotOptions: {
+                //     series: {
+                //         dataLabels: {
+                //             enabled: false
+                //         },
+                //         marker: {
+                //             radius: 3
+                //         }
+                //     }
+                // },
+                series:series
+                //     [{
+                //     // 空数据列，用于展示底图
+                //     mapData: Highcharts.maps['cn/china'],
+                //     showInLegend: false
+                // },{
+                //     type: 'mappoint',
+                //     name: '通过经纬度描点',
+                //     data: data
+                // }]
+            });
+        });
+    },"json");//即使是getJSON()也要指定json格式，否则双引号会带转义字符不能解析
+    //var data = [{"name":"北京","value":52},{"name":"上海","value":22},{"name":"杭州","value":72}];//测试数据
+    //var data = [{"name":"北京市","value":52},{"name":"上海市","value":22},{"name":"杭州市","value":72}];//测试数据
+
+</script>
+</body>
+</html>

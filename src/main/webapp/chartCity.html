@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/highmaps.js"></script>
+    <!--script src="js/exporting.js"></script-->
+    <script src="js/china.js"></script>
+</head>
+<body>
+<div id="map" style="width:800px;height: 500px;"></div>
+
+<script>
+    $.ajaxSettings.async = false;//取消异步调用
+    var series = [{
+            // 地图数据列
+            type: 'map',
+            mapData: Highcharts.maps["cn/china"],
+            joinBy: 'hc-key',
+            name: 'randomData',
+            states: {
+                hover: {
+                    color: '#a4edba'
+                }
+            },
+            showInLegend: false
+        }],
+        lastLevel = null;
+    // 中国城市分布数据
+    // https://data.jianshukeji.com/geochina/cities.json
+    // 这里用 JSONP 跨域访问或者文件读取
+    $.getJSON('json/cities.json', function(data) {
+        //alert(JSON.stringify(data));
+        for(var name in data) {
+            var d = data[name];
+            //alert(JSON.stringify(d));
+            if(d.level.level !== lastLevel) {
+                series.push({
+                    name: d.level.name,//level是几线城市
+                    visible: series.length < 3,//显示前几线城市
+                    data: []
+                });
+                lastLevel = d.level.level;
+            }
+            //城市数据加入data数据集
+            series[series.length -1].data.push({
+                name: name,//城市名
+                properties: d,//该条JSON数据
+                x: d.x,//x,y是官方数据经纬度转换好的坐标数据
+                y: -d.y
+            });
+        }
+        for(var i=1;i<series.length;i++) {
+            series[i].name += '（' + series[i].data.length + ' 个）';
+        }
+        // return false;
+        var map = new Highcharts.Map('map', {
+            chart: {
+                type: 'mappoint'
+            },
+            title: {
+                text: '中国城市分布'
+            },
+            subtitle: {
+                text: ''
+            },
+            mapNavigation: {
+                enabled: true,
+                buttonOptions: {
+                    verticalAlign: 'bottom'
+                }
+            },
+            legend: {//数据图例
+                layout: 'vertical',//vertical-垂直展示，horizontal-水平展示
+                align: 'left',
+                floating: true,
+                x: 30
+            },
+            tooltip: {
+                useHTML: true,
+                headerFormat: '<small>{point.key}</small><table>',
+                pointFormat: '<tr><td>城市级别</td><td>{series.name}</td></tr>' 	+
+                '<tr><td>经纬度</td><td>({point.properties.lon:.2f}, {point.properties.lat:.2f})</td></tr></table>'
+            },
+            plotOptions: {
+                series: {
+                    dataLabels: {
+                        enabled: false
+                    },
+                    marker: {
+                        radius: 3
+                    }
+                }
+            },
+            series: series
+        });
+    });
+</script>
+</body>
+</html>
